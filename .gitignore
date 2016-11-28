@@ -1,0 +1,7 @@
+.ensime
+.ensime_cache/
+
+/project/*-shim.sbt
+/project/project/
+/project/target/
+/target/

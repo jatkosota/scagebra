@@ -7,7 +7,9 @@ scalaVersion := "2.11.8"
 val scalazVersion = "7.2.7"
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % scalazVersion
+  "org.scalaz" %% "scalaz-core" % scalazVersion,
+  "org.scalactic" %% "scalactic" % "3.0.1",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 
 scalacOptions in ThisBuild ++= Seq(

@@ -5,9 +5,8 @@ import org.scalatest._
 
 import scala.collection.immutable.TreeMap
 
-import RationalImplicits._
-import MonomialImplicits._
-import scala.math.Numeric.Implicits._
+import Rational.Implicits._
+import Monomial.Implicits._
 
 class MonomialSpec extends FunSuite {
 

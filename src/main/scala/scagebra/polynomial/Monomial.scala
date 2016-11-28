@@ -1,11 +1,18 @@
 package scagebra
 package polynomial
 
-import RationalImplicits._
+import Rational.Implicits._
 
 case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit ord: Ordering[T])
 
-object MonomialImplicits {
+object Monomial {
+
+  trait ExtraImplicits {
+
+    implicit def infixNumericMonomialOps[T](x: Monomial[T])(implicit num: Numeric[Monomial[T]]): Numeric[Monomial[T]]#Ops = new num.Ops(x)
+  }
+
+  object Implicits extends ExtraImplicits
 
   implicit def MonomialIsNumeric[T](implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]): Numeric[Monomial[T]] =
     new Numeric[Monomial[T]] {

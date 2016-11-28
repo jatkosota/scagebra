@@ -20,7 +20,7 @@ package object polynomial {
       import scala.math.Ordering.Implicits._
       def compare(x: Variables[T], y: Variables[T]): Int =
         (x zip y).dropWhile(t => t._1 == t._2).headOption match {
-          case Some(((kl, vl), (kr, vr))) => 
+          case Some(((kl, vl), (kr, vr))) =>
             if(kl < kr) 1
             else if(kl > kr) -1
             else if(vl < vr) -1
@@ -31,10 +31,16 @@ package object polynomial {
             else if(x.size > y.size) 1
             else -1
         }
-    }
+    }  
 
   object Variables {
 
+    trait ExtraImplicits {
+      implicit def infixOrderingVariableOps[T](x: Variables[T])(implicit ord: Ordering[Variables[T]]): Ordering[Variables[T]]#Ops = new ord.Ops(x)
+    }
+
+    object Implicits extends ExtraImplicits
+    
     def empty[T](implicit ord: Ordering[T]): Variables[T] =
       TreeMap.empty
   }

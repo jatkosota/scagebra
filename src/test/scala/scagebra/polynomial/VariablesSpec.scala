@@ -3,9 +3,8 @@ package polynomial
 
 import org.scalatest._
 
-import scala.collection.immutable.TreeMap
-
-import RationalImplicits._
+import Variables.Implicits._
+import Rational.Implicits._
 
 class VariablesSpec extends FunSuite {
 

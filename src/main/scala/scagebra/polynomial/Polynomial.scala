@@ -15,11 +15,17 @@ case class Polynomial[T](monomials: TreeMap[Variables[T], Rational])(implicit or
   override def equals(other: Any): Boolean = other match {
     case that: Polynomial[T] =>
       Polynomial.PolynomialIsNumeric(ord, ordVar).compare(this, that) == 0
+    case that: Int =>
+      (this.reduce.monomials.size == 1 && Monomial(this.reduce.monomials.head) == that) ||
+        (this.reduce.monomials.isEmpty && that == 0)
     case _ => false // TODO Int, Long, BigInt, Double, Float
   }
 }
 
 object Polynomial {
+
+  implicit def MonomialToPolynomial[T](monomial: Monomial[T])(implicit ord: Ordering[T]): Polynomial[T] =
+    Polynomial(monomial)
 
   trait ExtraImplicits {
 
@@ -34,11 +40,15 @@ object Polynomial {
       private def plusMinus(x: Polynomial[T], y: Polynomial[T])(f: (Rational, Rational) => Rational): Polynomial[T] =
         Polynomial(y.monomials.foldLeft(x.monomials) { (ms, m) =>
           val (yvs, yc) = m
-          val update = ms.get(yvs) match {
-            case Some(xc) => yvs -> f(xc, yc)
-            case None => yvs -> f(0, yc)
+          ms.get(yvs) match {
+            case Some(xc) =>
+              val nc = f(xc, yc)
+              if(nc == 0) ms - yvs
+              else        ms + (yvs -> nc)
+            case None =>
+              if(yc == 0) ms
+              else        ms + (yvs -> f(0, yc))
           }
-          ms + update
         })
 
       def plus(x: Polynomial[T], y: Polynomial[T]): Polynomial[T] =
@@ -89,7 +99,7 @@ object Polynomial {
         val yrm = y.reduce.monomials
         (xrm zip yrm).dropWhile(t => t._1 == t._2).headOption match {
           case Some((xm, ym)) =>
-            Monomial.MonomialIsNumeric(ord, ordVar).compare(Monomial(xm), Monomial(ym))
+            Monomial.MonomialIsFractional(ord, ordVar).compare(Monomial(xm), Monomial(ym))
           case None =>
             if(xrm.size < yrm.size) -1
             else if(xrm.size > yrm.size) 1
@@ -100,4 +110,10 @@ object Polynomial {
 
   def apply[T](monomials: Monomial[T]*)(implicit ord: Ordering[T]): Polynomial[T] =
     Polynomial(TreeMap(monomials.map(m => m.variables -> m.coefficient): _*))
+
+  def empty[T](implicit ord: Ordering[T]): Polynomial[T] =
+    apply()
+
+  def zero[T](implicit ord: Ordering[T]): Polynomial[T] =
+    empty[T]
 }

@@ -40,4 +40,14 @@ class GroebnerSpec extends FunSuite {
         == m(1, v(y ^ 1, z ^ 1))
     )
   }
+
+  test("Polynomial can be divided by polynomials") {
+    assert(
+      p(m(1, v(x ^ 1, y ^ 2)), Monomial[String](1)).div(List(
+        p(m(1, v(x ^ 1, y ^ 1)), Monomial[String](1)),
+        p(m(1, v(y ^ 1)), Monomial[String](1))
+      ))._2
+        === p(Monomial[String](2))
+    )
+  }
 }

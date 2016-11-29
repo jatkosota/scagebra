@@ -12,7 +12,7 @@ case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit 
 
   override def equals(other: Any): Boolean = other match {
     case that: Monomial[T] =>
-      Monomial.MonomialIsNumeric(ord, ordVar).compare(this, that) == 0
+      Monomial.MonomialIsFractional(ord, ordVar).compare(this, that) == 0
     case that: Int =>
       ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
     case that: Long =>
@@ -37,23 +37,23 @@ object Monomial {
 
   trait ExtraImplicits {
 
-    implicit def infixNumericMonomialOps[T](x: Monomial[T])(implicit num: Numeric[Monomial[T]]): Numeric[Monomial[T]]#Ops = new num.Ops(x)
+    implicit def infixFractionalMonomialOps[T](x: Monomial[T])(implicit frac: Fractional[Monomial[T]]): Fractional[Monomial[T]]#FractionalOps = new frac.FractionalOps(x)
 
     implicit def infixOrderingMonomialOps[T](x: Monomial[T])(implicit ord: Ordering[Monomial[T]]): Ordering[Monomial[T]]#Ops = new ord.Ops(x)
   }
 
   object Implicits extends ExtraImplicits
 
-  implicit def MonomialIsNumeric[T](implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]): Numeric[Monomial[T]] =
-    new Numeric[Monomial[T]] {
+  implicit def MonomialIsFractional[T](implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]): Fractional[Monomial[T]] =
+    new Fractional[Monomial[T]] {
 
       private def plusMinus(x: Monomial[T], y: Monomial[T])(f: (Rational, Rational) => Rational): Monomial[T] =
         if(x.variables == y.variables) {
-          val newCoefficient = f(x.coefficient, y.coefficient)
-          if(newCoefficient == 0)
+          val nc = f(x.coefficient, y.coefficient)
+          if(nc == 0)
             Monomial(0, Variables.empty)
           else
-            x.copy(coefficient = newCoefficient)
+            x.copy(coefficient = nc)
         } else x
 
       /** Plus on monomials. This is counterintuitive.
@@ -70,19 +70,25 @@ object Monomial {
       def negate(x: Monomial[T]): Monomial[T] =
         x.copy(coefficient = -x.coefficient)
 
-      def times(x: Monomial[T], y: Monomial[T]): Monomial[T] =
-        Monomial(x.coefficient*y.coefficient, y.variables.foldLeft(x.variables) { (vs, v) =>
-          val (variable, e1) = v
-          vs.get(v._1) match {
-            case Some(e2) =>
-              val newE = e1 + e2
-              if(newE == 0)
-                vs - variable
+      private def timesDiv(x: Monomial[T], y: Monomial[T])(f: (Rational, Rational) => (Rational), g: (Int, Int) => Int): Monomial[T] =
+        Monomial(f(x.coefficient, y.coefficient), y.variables.foldLeft(x.variables) { (vs, v) =>
+          val (yv, ye) = v
+          vs.get(yv) match {
+            case Some(xe) =>
+              val e = g(xe, ye)
+              if(e == 0)
+                vs - yv
               else
-                vs + (variable -> newE)
-            case None => vs + v
+                vs + (yv -> e)
+            case None => vs + (yv -> g(0, ye))
           }
         })
+
+      def times(x: Monomial[T], y: Monomial[T]): Monomial[T] =
+        timesDiv(x, y)(_ * _, _ + _)
+ 
+      def div(x: Monomial[T], y: Monomial[T]): Monomial[T] =
+        timesDiv(x, y)(_ / _, _ - _)
 
       def toInt(x: Monomial[T]): Int =
         if(x.variables.isEmpty) x.coefficient.toInt

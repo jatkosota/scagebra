@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
 
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
-  "-language:implicitConversions"
+  "-language:implicitConversions",
+  "-deprecation"
 )
 
 initialCommands in console := "import scalaz._, Scalaz._"

@@ -52,5 +52,8 @@ package object polynomial {
 
   def m[T](coef: Rational, vars: Variables[T])(implicit ord: Ordering[T]): Monomial[T] =
     Monomial(coef, vars)
+
+  def p[T](args: Monomial[T]*)(implicit ord: Ordering[T]): Polynomial[T] =
+    Polynomial(args: _*)
 }
 

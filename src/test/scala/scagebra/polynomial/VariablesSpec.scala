@@ -14,6 +14,7 @@ class VariablesSpec extends FunSuite {
     val z = "z"
     assert(v(x ^ 1, y ^ 1) > v(x ^ 1))
     assert(v(x ^ 1, y ^ 1) > v(x ^ 1, z ^ 1))
+    assert(v(x ^ 0, y ^ 0, z ^ 0) < v(x ^ 0, z ^ 1))
     assert(v(x ^ 2) > v(x ^ 1, y ^ 1))
     assert(v(x ^ 1, z ^ 1) < v(x ^ 1, y ^ 1))
     assert(v(x ^ 1) < v(x ^ 1, y ^ 1))

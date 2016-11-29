@@ -5,10 +5,25 @@ import Rational.Implicits._
 
 case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]) {
 
+  def reduce: Monomial[T] =
+    if(coefficient == 0)
+      Monomial(0, Variables.empty[T])
+    else Monomial(coefficient, variables.filter { case (v, e) => e != 0 })
+
   override def equals(other: Any): Boolean = other match {
     case that: Monomial[T] =>
       Monomial.MonomialIsNumeric(ord, ordVar).compare(this, that) == 0
-    case _ => false // TODO Int, Long, BigInt, Double, Float
+    case that: Int =>
+      ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
+    case that: Long =>
+      ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
+    case that: BigInt =>
+      ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
+    case that: Float =>
+      ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
+    case that: Double =>
+      ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
+    case _ => false 
   }
 }
 
@@ -17,9 +32,14 @@ object Monomial {
   def apply[T](m: (Variables[T], Rational))(implicit ord: Ordering[T]): Monomial[T] =
     this(m._2, m._1)
 
+  def apply[T](c: Rational)(implicit ord: Ordering[T]): Monomial[T] =
+    this(c, Variables.empty[T])
+
   trait ExtraImplicits {
 
     implicit def infixNumericMonomialOps[T](x: Monomial[T])(implicit num: Numeric[Monomial[T]]): Numeric[Monomial[T]]#Ops = new num.Ops(x)
+
+    implicit def infixOrderingMonomialOps[T](x: Monomial[T])(implicit ord: Ordering[Monomial[T]]): Ordering[Monomial[T]]#Ops = new ord.Ops(x)
   }
 
   object Implicits extends ExtraImplicits
@@ -60,7 +80,7 @@ object Monomial {
                 vs - variable
               else
                 vs + (variable -> newE)
-            case None    => vs + v
+            case None => vs + v
           }
         })
 

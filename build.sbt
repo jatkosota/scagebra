@@ -18,4 +18,4 @@ scalacOptions in ThisBuild ++= Seq(
   "-deprecation"
 )
 
-initialCommands in console := "import scalaz._, Scalaz._"
+initialCommands in console := "import scalaz._, Scalaz._, scagebra._, polynomial._"

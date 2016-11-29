@@ -23,11 +23,11 @@ case class Rational(numer: BigInt, denom: BigInt = 1) {
     case _           => false
   }
 
-  import RationalImplicits._
+  import Rational.Implicits._
 
   override def equals(other: Any) = canEqual(other) && (other match {
     case that: Rational =>
-      RationalIsFractional.compare(this, that) == 0
+      Rational.RationalIsFractional.compare(this, that) == 0
     case that: Int =>
       this == Rational(that)
     case that: Long =>
@@ -47,8 +47,15 @@ case class Rational(numer: BigInt, denom: BigInt = 1) {
     s"$numer" + (if(denom == 1) "" else s"/$denom")
 }
 
-object RationalImplicits extends scala.math.Ordering.ExtraImplicits
-    with scala.math.Fractional.ExtraImplicits {
+object Rational {
+
+  trait ExtraImplicits {
+    implicit def infixOrderingRationalOps(x: Rational)(implicit ord: Ordering[Rational]): Ordering[Rational]#Ops = new ord.Ops(x)
+
+    implicit def infixFractinoalRationalOps(x: Rational)(implicit frac: Fractional[Rational]): Fractional[Rational]#FractionalOps = new frac.FractionalOps(x)
+  }
+
+  object Implicits extends ExtraImplicits
 
   implicit def IntToRational(self: Int) = new Rational(self)
 

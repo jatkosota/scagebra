@@ -2,7 +2,7 @@ package scagebra
 
 import org.scalatest._
 
-import RationalImplicits._
+import Rational.Implicits._
 
 class RationalSpec extends FunSuite {
 

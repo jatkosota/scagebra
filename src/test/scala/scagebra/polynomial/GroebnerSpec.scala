@@ -139,7 +139,7 @@ class GroebnerSpec extends FunSuite {
     //      -34656 + 5120 x 6591 z + 5732 z^2 + 1329 z^3 + 2184 z^4 + 507 z^5 + 96 z^6 + 39 z^7
     //    }
     // This test is passed, but it takes so long time.
-    // assert(MinimalGroebnerBasis(Set(
+    // assert(ReducedGroebnerBasis(Set(
     //   p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
     //   p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
     //   p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))

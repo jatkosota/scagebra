@@ -1,6 +1,7 @@
 package scagebra
 package polynomial
 
+import Variables.Implicits._
 import Monomial.Implicits._
 import Polynomial.Implicits._
 
@@ -97,6 +98,7 @@ object Groebner {
   def GroebnerBasis[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): Set[Polynomial[T]] = {
     val ss = for {
       List(p, q) <- gs.toList.combinations(2)
+      if LCM(p, q) != Monomial(1, p.LM) * Monomial(1, q.LM)
       s = S_G(p, q)(gs.toList)
       if s != 0
     } yield s
@@ -123,6 +125,18 @@ object Groebner {
     eliminate(lt1.toList.sorted, lt1)
   }
 
-  def ReducedGroebnerBasis[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): Set[Polynomial[T]] = MinimalGroebnerBasis(gs)
-  
+  def ReducedGroebnerBasis[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): Set[Polynomial[T]] = {
+    val minGroebnerBasis = MinimalGroebnerBasis(gs)
+
+    def reduce(gs: List[Polynomial[T]], gg: Set[Polynomial[T]]): Set[Polynomial[T]] =
+      gs match {
+        case Nil => gg
+        case g::tl =>
+          val gg_g = gg - g
+          val g_ = g % gg_g.toList
+          reduce(tl, gg_g + g_)
+      }
+    
+    reduce(minGroebnerBasis.toList, minGroebnerBasis)
+  }
 }

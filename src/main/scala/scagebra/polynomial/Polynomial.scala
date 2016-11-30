@@ -12,6 +12,9 @@ case class Polynomial[T](monomials: TreeMap[Variables[T], Rational])(implicit or
 
   // TODO canEqual
 
+  override def toString =
+    monomials.toList.map(Monomial(_)).mkString(" + ")
+
   override def equals(other: Any): Boolean = other match {
     case that: Polynomial[T] =>
       Polynomial.PolynomialIsNumeric(ord, ordVar).compare(this, that) == 0

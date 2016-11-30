@@ -5,10 +5,24 @@ import Rational.Implicits._
 
 case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]) {
 
-  def reduce: Monomial[T] =
+  lazy val reduce: Monomial[T] =
     if(coefficient == 0)
       Monomial(0, Variables.empty[T])
     else Monomial(coefficient, variables.filter { case (v, e) => e != 0 })
+
+  private def variablesToString =
+    reduce.variables.map { case (v, e) => if(e == 1) s"$v" else s"$v^$e" }mkString(" ")
+
+  override def toString =
+    if(reduce.coefficient == 1)
+      variablesToString
+    else if(reduce.coefficient == -1)
+      "(- " + variablesToString + ")"
+    else if(reduce.coefficient > 0)
+      s"${reduce.coefficient} $variablesToString"
+    else if(reduce.coefficient < 0)
+      s"(${reduce.coefficient}) $variablesToString"
+    else "0"
 
   override def equals(other: Any): Boolean = other match {
     case that: Monomial[T] =>

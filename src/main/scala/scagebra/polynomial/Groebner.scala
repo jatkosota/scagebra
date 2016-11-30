@@ -95,48 +95,63 @@ object Groebner {
   def γ[T](f: Polynomial[T], g: Polynomial[T])(implicit ord: Ordering[T]): Variables[T] =
     LCM(f, g).variables
 
-  def GroebnerBasis[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): Set[Polynomial[T]] = {
-    val ss = for {
-      List(p, q) <- gs.toList.combinations(2)
-      if LCM(p, q) != Monomial(1, p.LM) * Monomial(1, q.LM)
-      s = S_G(p, q)(gs.toList)
-      if s != 0
-    } yield s
-    val newGs = gs ++ ss
-    if(gs == newGs)
-      gs
-    else
-      GroebnerBasis(newGs)
-  }
+  implicit def Syzygy[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): GroebnerBasis[T] = {
+    val B = for {
+      j <- 0 until gs.size
+      i <- 0 until j
+    } yield (i, j)
+    val G = gs
+    val t = gs.size
 
-  def MinimalGroebnerBasis[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): Set[Polynomial[T]] = {
-    val groebnerBasis = GroebnerBasis(gs)
-    val lt1 = groebnerBasis.map { p => p * Monomial(p.LC.reciprocal)(ord) }
+    def pair(i: Int, j: Int): (Int, Int) =
+      if(i < j) (i, j) else (j, i)
 
-    def eliminate(gs: List[Polynomial[T]], ms: Set[Polynomial[T]]): Set[Polynomial[T]] =
-      gs match {
-        case Nil => ms
-        case hd::tl =>
-          if(ms(hd)) {
-            val canElim = ms.filter(g => (g.LT/hd.LT).variables.forall(_._2 >= 0))
-            eliminate(tl, (ms &~ canElim) + hd)
-          } else eliminate(tl, ms)
+    def criterion(G: List[Polynomial[T]], ij: (Int, Int), B: Set[(Int, Int)]): Boolean =
+      (0 until G.size).exists { k =>
+        val (i, j) = ij
+        k != i && k != j &&
+          !B(pair(i, k)) && !B(pair(j, k)) &&
+            (LCM(G(i), G(j)) / G(k).LT).variables.forall(_._2 >= 0)
       }
-    eliminate(lt1.toList.sorted, lt1)
-  }
 
-  def ReducedGroebnerBasis[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): Set[Polynomial[T]] = {
-    val minGroebnerBasis = MinimalGroebnerBasis(gs)
-
-    def reduce(gs: List[Polynomial[T]], gg: Set[Polynomial[T]]): Set[Polynomial[T]] =
-      gs match {
-        case Nil => gg
-        case g::tl =>
-          val gg_g = gg - g
-          val g_ = g % gg_g.toList
-          reduce(tl, gg_g + g_)
+    def iteration(B: Set[(Int, Int)], G: List[Polynomial[T]], t: Int): List[Polynomial[T]] =
+      if(B.isEmpty)
+        G
+      else {
+        val i_j = B.head
+        val (i, j) = i_j
+        val fi = G(i)
+        val fj = G(j)
+        if(LCM(fi, fj) != Monomial(1, fi.LM) * Monomial(1, fj.LM) &&
+          !criterion(G, (i, j), B)) {
+          val S = S_G(fi, fj)(G)
+          if(S != 0) iteration(B union (0 to t).map(i => (i, t)).toSet, G:+S, t + 1)
+          else iteration(B.tail, G, t)
+        } else iteration(B.tail, G, t)
       }
-    
-    reduce(minGroebnerBasis.toList, minGroebnerBasis)
+
+    GroebnerBasis(iteration(B.toSet, G.toList, t).toSet)
   }
+
+  def Buchberger[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): GroebnerBasis[T] = {
+    def loop(gs: Set[Polynomial[T]]): Set[Polynomial[T]] = {
+      val ss = for {
+        List(p, q) <- gs.toList.combinations(2)
+        if LCM(p, q) != Monomial(1, p.LM) * Monomial(1, q.LM)
+        s = S_G(p, q)(gs.toList)
+        if s != 0
+      } yield s
+      val newGs = gs ++ ss
+      if(gs == newGs)
+        gs
+      else
+        loop(newGs)
+    }
+
+    GroebnerBasis(loop(gs))
+  }
+
+  def groebner[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T], algorithm: Set[Polynomial[T]] => GroebnerBasis[T]): GroebnerBasis[T] =
+    algorithm(gs)
+
 }

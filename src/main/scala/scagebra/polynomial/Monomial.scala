@@ -14,7 +14,9 @@ case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit 
     reduce.variables.map { case (v, e) => if(e == 1) s"$v" else s"$v^$e" }mkString(" ")
 
   override def toString =
-    if(reduce.coefficient == 1)
+    if(reduce.variables.isEmpty)
+      reduce.coefficient.toString
+    else if(reduce.coefficient == 1)
       variablesToString
     else if(reduce.coefficient == -1)
       "(- " + variablesToString + ")"

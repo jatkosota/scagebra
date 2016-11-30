@@ -126,13 +126,23 @@ class GroebnerSpec extends FunSuite {
   }
 
   test("Groebner Basis") {
-    // MinimalGroebnerBasis(x^3 + x y, x ^ 2 y - 2 y^2 + x) == { y^3, x - 2 y }
-    assert(MinimalGroebnerBasis(Set(
+    // ReducedGroebnerBasis(x^3 + x y, x ^ 2 y - 2 y^2 + x) == { y^3, x - 2 y }
+    assert(groebner(Set(
       p(m(1, v(x ^ 3)), m(-2, v(x ^ 1, y ^ 1))),
       p(m(1, v(x ^ 2, y ^ 1)), m(-2, v(y ^ 2)), m(1, v(x ^ 1)))
-    ))
-      == Set(p(m(1, v(y ^ 3))), p(m(1, v(x ^ 1)), m(-2, v(y ^ 2))))
+    ))(implicitly[Ordering[String]], Syzygy).minimal
+      == GroebnerBasis(Set(p(m(1, v(y ^ 3))), p(m(1, v(x ^ 1)), m(-2, v(y ^ 2)))))
     )
+    assert(groebner(Set(
+      p(m(1, v(x ^ 3)), m(-2, v(x ^ 1, y ^ 1))),
+      p(m(1, v(x ^ 2, y ^ 1)), m(-2, v(y ^ 2)), m(1, v(x ^ 1)))
+    ))(implicitly[Ordering[String]], Syzygy).reduced
+      == groebner(Set(
+        p(m(1, v(x ^ 3)), m(-2, v(x ^ 1, y ^ 1))),
+        p(m(1, v(x ^ 2, y ^ 1)), m(-2, v(y ^ 2)), m(1, v(x ^ 1)))
+      ))(implicitly[Ordering[String]], Buchberger).reduced
+    )
+    
     // MinimalGroebnerBasis(x^2 + y^2 + z^2 - 1, x y - z + 2, z^2 - 2 x + 3 y)
     // == { 1024 - 832 z - 215 z^2 + 156 z^3 - 25 z^4 + 24 z^5 + 13 z^6 + z^8,
     //      -11552 + 2560 y + 2197 z + 2764 z^2 + 443 z^3 + 728 z^4 + 169 z^5 + 32 z^6 + 13 z^7,
@@ -146,5 +156,16 @@ class GroebnerSpec extends FunSuite {
     // ))
     //   == Set(:above:))
     // )
+
+    assert(groebner(Set(
+      p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
+      p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
+      p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
+    ))(implicitly[Ordering[String]], Buchberger).reduced
+      == groebner(Set(
+        p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
+        p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
+        p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
+      ))(implicitly[Ordering[String]], Syzygy).reduced)
   }
 }

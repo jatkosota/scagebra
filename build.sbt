@@ -18,4 +18,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-deprecation"
 )
 
-initialCommands in console := "import scalaz._, Scalaz._, scagebra._, polynomial._"
+initialCommands in console := "import scalaz._, Scalaz._" ++
+  ", scagebra._, polynomial._" ++
+  ", Variables.Implicits._, Monomial.Implicits._, Polynomial.Implicits._, Rational.Implicits._" ++
+  ", Groebner._\n" ++
+  "val x = \"x\"; val y = \"y\"; val z = \"z\""

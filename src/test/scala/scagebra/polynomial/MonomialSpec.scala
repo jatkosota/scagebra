@@ -14,7 +14,7 @@ class MonomialSpec extends FunSuite {
   val y = "y"
   val z = "z"
 
-  test("Monomial has three arithmetic oparations") {
+  test("Monomial has four arithmetic oparations") {
     assert(m(1, v(x ^ 1)) + m(2, v(x ^ 1)) == m(3, v(x ^ 1)))
     assert(m(1, v(x ^ 1)) + m(2, v(x ^ 2)) == m(1, v(x ^ 1)))
     assert(m(2, v(x ^ 2)) + m(1, v(x ^ 1)) == m(2, v(x ^ 2)))
@@ -31,6 +31,12 @@ class MonomialSpec extends FunSuite {
     assert(m(1, v(x ^ 1, y ^ 2)) * m(3, v(z ^ 3)) == m(3, v(x ^ 1, y ^ 2, z ^ 3)))
     assert(m(1, v(x ^ 1, y ^ 2)) * m(3, v(x ^ 2, z ^ 3)) == m(3, v(x ^ 3, y ^ 2, z ^ 3)))
     assert(m(2, v(x ^ 2)) * m(0, v(x ^ 1)) == m(0, v[String]()))
+
+    assert(m(2, v(x ^ 2)) / m(1, v(x ^ 1)) == m(2, v(x ^ 1)))
+    assert(m(2, v(x ^ 2)) / m(2, v(x ^ 1)) == m(1, v(x ^ 1)))
+    assert(m(1, v(x ^ 1, y ^ 2)) / m(3, v(y ^ 2)) == m(Rational(1, 3), v(x ^ 1)))
+    assert(m(1, v(x ^ 3, y ^ 2, z ^ 4)) / m(3, v(x ^ 2, z ^ 3)) == m(Rational(1, 3), v(x ^ 1, y ^ 2, z ^ 1)))
+    assert(m(2, v(x ^ 2)) / m(1, v(x ^ 2)) == m(2, v[String]()))
   }
 
   test("Monomial can reduce") {

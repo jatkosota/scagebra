@@ -130,17 +130,18 @@ class GroebnerSpec extends FunSuite {
     assert(groebner(Set(
       p(m(1, v(x ^ 3)), m(-2, v(x ^ 1, y ^ 1))),
       p(m(1, v(x ^ 2, y ^ 1)), m(-2, v(y ^ 2)), m(1, v(x ^ 1)))
-    ))(implicitly[Ordering[String]], Syzygy).minimal
+    ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
       == GroebnerBasis(Set(p(m(1, v(y ^ 3))), p(m(1, v(x ^ 1)), m(-2, v(y ^ 2)))))
     )
+    // ReducedGroebnerBasis[Syzygy] == ReducedGroebnerBasis[Bucberger]
     assert(groebner(Set(
       p(m(1, v(x ^ 3)), m(-2, v(x ^ 1, y ^ 1))),
       p(m(1, v(x ^ 2, y ^ 1)), m(-2, v(y ^ 2)), m(1, v(x ^ 1)))
-    ))(implicitly[Ordering[String]], Syzygy).reduced
+    ))(implicitly[scala.math.Ordering[String]], Buchberger).reduced
       == groebner(Set(
         p(m(1, v(x ^ 3)), m(-2, v(x ^ 1, y ^ 1))),
         p(m(1, v(x ^ 2, y ^ 1)), m(-2, v(y ^ 2)), m(1, v(x ^ 1)))
-      ))(implicitly[Ordering[String]], Buchberger).reduced
+      ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
     )
     
     // MinimalGroebnerBasis(x^2 + y^2 + z^2 - 1, x y - z + 2, z^2 - 2 x + 3 y)
@@ -161,11 +162,32 @@ class GroebnerSpec extends FunSuite {
       p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
       p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
       p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
-    ))(implicitly[Ordering[String]], Buchberger).reduced
+    ))(implicitly[scala.math.Ordering[String]], Buchberger).reduced
       == groebner(Set(
         p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
         p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
         p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
-      ))(implicitly[Ordering[String]], Syzygy).reduced)
+      ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
+    )
+
+    assert(groebner(Set(
+      p(m(1, v(x ^ 1)), m(1, v(y ^ 1))),
+      p(m(1, v(x ^ 2)), Monomial[String](-1)),
+      p(m(1, v(y ^ 2)), m(-2, v(x ^ 1)))
+    ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
+      == GroebnerBasis(Set(p(Monomial[String](1))))
+    )
+
+    assert(groebner(Set(
+      p(m(1, v(x ^ 1)), m(1, v(y ^ 1))),
+      p(m(1, v(x ^ 2)), Monomial[String](-1)),
+      p(m(1, v(y ^ 2)), m(-2, v(x ^ 1)))
+    ))(implicitly[scala.math.Ordering[String]], Buchberger).reduced
+      == groebner(Set(
+        p(m(1, v(x ^ 1)), m(1, v(y ^ 1))),
+        p(m(1, v(x ^ 2)), Monomial[String](-1)),
+        p(m(1, v(y ^ 2)), m(-2, v(x ^ 1)))
+      ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
+    )
   }
 }

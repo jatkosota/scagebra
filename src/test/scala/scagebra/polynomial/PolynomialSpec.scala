@@ -3,7 +3,7 @@ package polynomial
 
 import org.scalatest._
 
-import Variables.Implicits._
+import Monomial.Implicits._
 import Rational.Implicits._
 import Polynomial.Implicits._
 
@@ -28,7 +28,7 @@ class PolynomialSpec extends FunSuite {
     // 2 x y - 2 x y == 0
     assert(
       p(m(2, v(x ^ 1, y ^ 1))) - p(m(2, v(x ^ 1, y ^ 1)))
-        == p(Monomial[String](0))
+        == p(Term[String](0))
     )
 
     // 2 x y - 3 x y == - x y
@@ -52,12 +52,12 @@ class PolynomialSpec extends FunSuite {
     // 2 x y * 0 x z == 0
     assert(
       p(m(2, v(x ^ 1, y ^ 1))) * p(m(0, v(x ^ 1, z ^ 1)))
-        === p(Monomial[String](0))
+        === p(Term[String](0))
     )
     // 0 x z * 2 x y == 0
     assert(
       p(m(0, v(x ^ 1, z ^ 1))) * p(m(2, v(x ^ 1, y ^ 1)))
-        === p(Monomial[String](0))
+        === p(Term[String](0))
     )
     // 2 x * 3 x y^2 == 6 x^2 y^2
     assert(
@@ -94,7 +94,7 @@ class PolynomialSpec extends FunSuite {
     )
     // -(0) = (-0)
     assert(
-      -p(Monomial[String](0)) == p(Monomial[String](0))
+      -p(Term[String](0)) == p(Term[String](0))
     )
   }
 }

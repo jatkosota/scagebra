@@ -1,13 +1,13 @@
 package scagebra
 package polynomial
 
-import Variables.Implicits._
 import Monomial.Implicits._
+import Term.Implicits._
 import Polynomial.Implicits._
 
 object Groebner {
 
-  implicit class GroebnerPolynomial[T](self: Polynomial[T])(implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]) {
+  implicit class GroebnerPolynomial[T](self: Polynomial[T])(implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]) {
 
     def div(fs: List[Polynomial[T]]): List[Polynomial[T]] = divMod(fs)._1
 
@@ -53,15 +53,15 @@ object Groebner {
     /** leading coefficient */
     def LC: Rational = LT.coefficient
     /** leading monomial */
-    def LM: Variables[T] = LT.variables
+    def LM: Monomial[T] = LT.variables
     /** leading term */
-    def LT: Monomial[T] =
+    def LT: Term[T] =
       if(self.monomials.isEmpty)
-        Monomial(0)
+        Term(0)
     else
-      Monomial(self.monomials.max)
+      Term(self.monomials.max)
 
-    def multideg: Variables[T] = LM
+    def multideg: Monomial[T] = LM
   }
 
   /** S-polynomial. */
@@ -80,8 +80,8 @@ object Groebner {
     * γ_i = max(α_i, β_i), γ = (γ_1, ..., γ_n).
     * x^γ^ is a least common multiple, x^γ^ = LCM(LM(f), LM(g)).
     */
-  def LCM[T](f: Polynomial[T], g: Polynomial[T])(implicit ord: Ordering[T]): Monomial[T] =
-    Monomial(1, g.LM.foldLeft(f.LM) { (vs, vg) =>
+  def LCM[T](f: Polynomial[T], g: Polynomial[T])(implicit ord: Ordering[T]): Term[T] =
+    Term(1, g.LM.foldLeft(f.LM) { (vs, vg) =>
       val (ng, eg) = vg
       vs.get(ng) match {
         case Some(ef) =>
@@ -92,7 +92,7 @@ object Groebner {
     })
 
   /** @see [[scagebra.polynomial.Groebner#LCM]] */
-  def γ[T](f: Polynomial[T], g: Polynomial[T])(implicit ord: Ordering[T]): Variables[T] =
+  def γ[T](f: Polynomial[T], g: Polynomial[T])(implicit ord: Ordering[T]): Monomial[T] =
     LCM(f, g).variables
 
   implicit def Syzygy[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): GroebnerBasis[T] = {
@@ -122,7 +122,7 @@ object Groebner {
         val (i, j) = i_j
         val fi = G(i)
         val fj = G(j)
-        if(LCM(fi, fj) != Monomial(1, fi.LM) * Monomial(1, fj.LM) &&
+        if(LCM(fi, fj) != Term(1, fi.LM) * Term(1, fj.LM) &&
           !criterion(G, (i, j), B)) {
           val S = S_G(fi, fj)(G)
           if(S != 0) iteration(B union (0 to t).map(i => (i, t)).toSet, G:+S, t + 1)
@@ -137,7 +137,7 @@ object Groebner {
     def loop(gs: Set[Polynomial[T]]): Set[Polynomial[T]] = {
       val ss = for {
         List(p, q) <- gs.toList.combinations(2)
-        if LCM(p, q) != Monomial(1, p.LM) * Monomial(1, q.LM)
+        if LCM(p, q) != Term(1, p.LM) * Term(1, q.LM)
         s = S_G(p, q)(gs.toList)
         if s != 0
       } yield s

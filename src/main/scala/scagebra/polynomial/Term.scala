@@ -3,12 +3,12 @@ package polynomial
 
 import Rational.Implicits._
 
-case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]) {
+case class Term[T](coefficient: Rational, variables: Monomial[T])(implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]) {
 
-  lazy val reduce: Monomial[T] =
+  lazy val reduce: Term[T] =
     if(coefficient == 0)
-      Monomial(0, Variables.empty[T])
-    else Monomial(coefficient, variables.filter { case (v, e) => e != 0 })
+      Term(0, Monomial.empty[T])
+    else Term(coefficient, variables.filter { case (v, e) => e != 0 })
 
   private def variablesToString =
     reduce.variables.map { case (v, e) => if(e == 1) s"$v" else s"$v^$e" }mkString(" ")
@@ -27,8 +27,8 @@ case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit 
     else "0"
 
   override def equals(other: Any): Boolean = other match {
-    case that: Monomial[T] =>
-      Monomial.MonomialIsFractional(ord, ordVar).compare(this, that) == 0
+    case that: Term[T] =>
+      Term.TermIsFractional(ord, ordVar).compare(this, that) == 0
     case that: Int =>
       ((coefficient == 0) || variables.isEmpty) && this.coefficient == that
     case that: Long =>
@@ -43,51 +43,51 @@ case class Monomial[T](coefficient: Rational, variables: Variables[T])(implicit 
   }
 }
 
-object Monomial {
+object Term {
 
-  def apply[T](m: (Variables[T], Rational))(implicit ord: Ordering[T]): Monomial[T] =
+  def apply[T](m: (Monomial[T], Rational))(implicit ord: Ordering[T]): Term[T] =
     this(m._2, m._1)
 
-  def apply[T](c: Rational)(implicit ord: Ordering[T]): Monomial[T] =
-    this(c, Variables.empty[T])
+  def apply[T](c: Rational)(implicit ord: Ordering[T]): Term[T] =
+    this(c, Monomial.empty[T])
 
   trait ExtraImplicits {
 
-    implicit def infixFractionalMonomialOps[T](x: Monomial[T])(implicit frac: Fractional[Monomial[T]]): Fractional[Monomial[T]]#FractionalOps = new frac.FractionalOps(x)
+    implicit def infixFractionalTermOps[T](x: Term[T])(implicit frac: Fractional[Term[T]]): Fractional[Term[T]]#FractionalOps = new frac.FractionalOps(x)
 
-    implicit def infixOrderingMonomialOps[T](x: Monomial[T])(implicit ord: Ordering[Monomial[T]]): Ordering[Monomial[T]]#Ops = new ord.Ops(x)
+    implicit def infixOrderingTermOps[T](x: Term[T])(implicit ord: Ordering[Term[T]]): Ordering[Term[T]]#Ops = new ord.Ops(x)
   }
 
   object Implicits extends ExtraImplicits
 
-  implicit def MonomialIsFractional[T](implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]): Fractional[Monomial[T]] =
-    new Fractional[Monomial[T]] {
+  implicit def TermIsFractional[T](implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]): Fractional[Term[T]] =
+    new Fractional[Term[T]] {
 
-      private def plusMinus(x: Monomial[T], y: Monomial[T])(f: (Rational, Rational) => Rational): Monomial[T] =
+      private def plusMinus(x: Term[T], y: Term[T])(f: (Rational, Rational) => Rational): Term[T] =
         if(x.variables == y.variables) {
           val nc = f(x.coefficient, y.coefficient)
           if(nc == 0)
-            Monomial(0, Variables.empty)
+            Term(0, Monomial.empty)
           else
             x.copy(coefficient = nc)
         } else x
 
       /** Plus on monomials. This is counterintuitive.
         * If 'variables' which is the part of monomial except the coefficient is different, returns self.
-        * If not, returns a [[scagebra.polynomial.Monomial]] whose coefficient is the sum of `x`'s coefficient and `y`'s coefficient.
+        * If not, returns a [[scagebra.polynomial.Term]] whose coefficient is the sum of `x`'s coefficient and `y`'s coefficient.
         * Notice, this doesn't satisfy the commutative property, so `x plus y == y plus x` isn't always satisfied.
         */
-      def plus(x: Monomial[T], y: Monomial[T]): Monomial[T] =
+      def plus(x: Term[T], y: Term[T]): Term[T] =
         plusMinus(x, y)(_ + _)
 
-      def minus(x: Monomial[T], y: Monomial[T]): Monomial[T] =
+      def minus(x: Term[T], y: Term[T]): Term[T] =
         plusMinus(x, y)(_ - _)
 
-      def negate(x: Monomial[T]): Monomial[T] =
+      def negate(x: Term[T]): Term[T] =
         x.copy(coefficient = -x.coefficient)
 
-      private def timesDiv(x: Monomial[T], y: Monomial[T])(f: (Rational, Rational) => (Rational), g: (Int, Int) => Int): Monomial[T] =
-        Monomial(f(x.coefficient, y.coefficient), y.variables.foldLeft(x.variables) { (vs, v) =>
+      private def timesDiv(x: Term[T], y: Term[T])(f: (Rational, Rational) => (Rational), g: (Int, Int) => Int): Term[T] =
+        Term(f(x.coefficient, y.coefficient), y.variables.foldLeft(x.variables) { (vs, v) =>
           val (yv, ye) = v
           vs.get(yv) match {
             case Some(xe) =>
@@ -100,32 +100,32 @@ object Monomial {
           }
         })
 
-      def times(x: Monomial[T], y: Monomial[T]): Monomial[T] =
+      def times(x: Term[T], y: Term[T]): Term[T] =
         timesDiv(x, y)(_ * _, _ + _)
  
-      def div(x: Monomial[T], y: Monomial[T]): Monomial[T] =
+      def div(x: Term[T], y: Term[T]): Term[T] =
         timesDiv(x, y)(_ / _, _ - _)
 
-      def toInt(x: Monomial[T]): Int =
+      def toInt(x: Term[T]): Int =
         if(x.variables.isEmpty) x.coefficient.toInt
         else throw new IllegalStateException(s"$x cannot convert to Int")
 
-      def toFloat(x: Monomial[T]): Float =
+      def toFloat(x: Term[T]): Float =
         if(x.variables.isEmpty) x.coefficient.toFloat
         else throw new IllegalStateException(s"$x cannot convert to Float")
 
-      def toDouble(x: Monomial[T]): Double =
+      def toDouble(x: Term[T]): Double =
         if(x.variables.isEmpty) x.coefficient.toDouble
         else throw new IllegalStateException(s"$x cannot convert to Double")
 
-      def toLong(x: Monomial[T]): Long =
+      def toLong(x: Term[T]): Long =
         if(x.variables.isEmpty) x.coefficient.toLong
         else throw new IllegalStateException(s"$x cannot convert to Long")
 
-      def fromInt(x: Int): Monomial[T] =
-        Monomial(x, Variables.empty[T])
+      def fromInt(x: Int): Term[T] =
+        Term(x, Monomial.empty[T])
 
-      def compare(x: Monomial[T], y: Monomial[T]): Int =
+      def compare(x: Term[T], y: Term[T]): Int =
         if(x.variables == y.variables) {
           if(x.coefficient < y.coefficient) -1
           else if(x.coefficient > y.coefficient) 1

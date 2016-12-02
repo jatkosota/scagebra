@@ -4,7 +4,7 @@ package polynomial
 import org.scalatest._
 
 import Rational.Implicits._
-import Monomial.Implicits._
+import Term.Implicits._
 import Polynomial.Implicits._
 import Groebner._
 
@@ -44,42 +44,42 @@ class GroebnerSpec extends FunSuite {
   test("Polynomial can be divided by polynomials") {
     // x y^2 + 1 / [ x y + 1, y + 1 ] == [ y, -1 ]
     assert(
-      p(m(1, v(x ^ 1, y ^ 2)), Monomial[String](1)) / List(
-        p(m(1, v(x ^ 1, y ^ 1)), Monomial[String](1)),
-        p(m(1, v(y ^ 1)), Monomial[String](1))
+      p(m(1, v(x ^ 1, y ^ 2)), Term[String](1)) / List(
+        p(m(1, v(x ^ 1, y ^ 1)), Term[String](1)),
+        p(m(1, v(y ^ 1)), Term[String](1))
       )
-        === List(p(m(1, v(y ^ 1))), p(Monomial[String](-1)))
+        === List(p(m(1, v(y ^ 1))), p(Term[String](-1)))
     )
     // x y^2 + 1 % [ x y + 1, y + 1 ] == 2
     assert(
-      p(m(1, v(x ^ 1, y ^ 2)), Monomial[String](1)) % List(
-        p(m(1, v(x ^ 1, y ^ 1)), Monomial[String](1)),
-        p(m(1, v(y ^ 1)), Monomial[String](1))
+      p(m(1, v(x ^ 1, y ^ 2)), Term[String](1)) % List(
+        p(m(1, v(x ^ 1, y ^ 1)), Term[String](1)),
+        p(m(1, v(y ^ 1)), Term[String](1))
       )
-        === p(Monomial[String](2))
+        === p(Term[String](2))
     )
 
     // x^2 y + x y^2 + y^2 / [ x y - 1, y^2 - 1 ] == [ x + y, 1 ]
     assert(
       p(m(1, v(x ^ 2, y ^ 1)), m(1, v(x ^ 1, y ^ 2)), m(1, v(y ^ 2))) / List(
-        p(m(1, v(x ^ 1, y ^ 1)), Monomial[String](-1)),
-        p(m(1, v(y ^ 2)), Monomial[String](-1))
+        p(m(1, v(x ^ 1, y ^ 1)), Term[String](-1)),
+        p(m(1, v(y ^ 2)), Term[String](-1))
       )
-        === List(p(m(1, v(x ^ 1)), m(1, v(y ^ 1))), p(Monomial[String](1)))
+        === List(p(m(1, v(x ^ 1)), m(1, v(y ^ 1))), p(Term[String](1)))
     )
 
     // x^2 y + x y^2 + y^2 % [ x y - 1, y^2 - 1 ] == x + y + 1
     assert(
       p(m(1, v(x ^ 2, y ^ 1)), m(1, v(x ^ 1, y ^ 2)), m(1, v(y ^ 2))) % List(
-        p(m(1, v(x ^ 1, y ^ 1)), Monomial[String](-1)),
-        p(m(1, v(y ^ 2)), Monomial[String](-1))
+        p(m(1, v(x ^ 1, y ^ 1)), Term[String](-1)),
+        p(m(1, v(y ^ 2)), Term[String](-1))
       )
-        === p(m(1, v(x ^ 1)), m(1, v(y ^ 1)), Monomial[String](1))
+        === p(m(1, v(x ^ 1)), m(1, v(y ^ 1)), Term[String](1))
     )
 
     // 3 x^3 + x^2 y - x + 2 / [ 2 x^2 + y, x y - x ] == [ (3/2) x + (1/2) y, -(3/2) ]
     assert(
-      p(m(3, v(x ^ 3)), m(1, v(x ^ 2, y ^ 1)), m(-1, v(x ^ 1)), Monomial[String](2)) / List(
+      p(m(3, v(x ^ 3)), m(1, v(x ^ 2, y ^ 1)), m(-1, v(x ^ 1)), Term[String](2)) / List(
         p(m(2, v(x ^ 2)), m(1, v(y ^ 1))),
         p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(x ^ 1)))
       )
@@ -91,11 +91,11 @@ class GroebnerSpec extends FunSuite {
 
     // 3 x^3 + x^2 y - x + 2 % [ 2 x^2 + y, x y - x ] == -(5/2) x - (1/2) y^2 + 2
     assert(
-      p(m(3, v(x ^ 3)), m(1, v(x ^ 2, y ^ 1)), m(-1, v(x ^ 1)), Monomial[String](2)) % List(
+      p(m(3, v(x ^ 3)), m(1, v(x ^ 2, y ^ 1)), m(-1, v(x ^ 1)), Term[String](2)) % List(
         p(m(2, v(x ^ 2)), m(1, v(y ^ 1))),
         p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(x ^ 1)))
       )
-        === p(m(-Rational(5, 2), v(x ^ 1)), m(-Rational(1, 2), v(y ^ 2)), Monomial[String](2))
+        === p(m(-Rational(5, 2), v(x ^ 1)), m(-Rational(1, 2), v(y ^ 2)), Term[String](2))
     )
   }
 
@@ -150,21 +150,21 @@ class GroebnerSpec extends FunSuite {
     //    }
     // This test is passed, but it takes so long time.
     // assert(ReducedGroebnerBasis(Set(
-    //   p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
-    //   p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
+    //   p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Term[String](-1)),
+    //   p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Term[String](2)),
     //   p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
     // ))
     //   == Set(:above:))
     // )
 
     assert(groebner(Set(
-      p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
-      p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
+      p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Term[String](-1)),
+      p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Term[String](2)),
       p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
     ))(implicitly[Ordering[String]], Buchberger).reduced
       == groebner(Set(
-        p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Monomial[String](-1)),
-        p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Monomial[String](2)),
+        p(m(1, v(x ^ 2)), m(1, v(y ^ 2)), m(1, v(z ^ 2)), Term[String](-1)),
+        p(m(1, v(x ^ 1, y ^ 1)), m(-1, v(z ^ 1)), Term[String](2)),
         p(m(1, v(z ^ 2)), m(-2, v(x ^ 1)), m(3, v(y ^ 1)))
       ))(implicitly[Ordering[String]], Syzygy).reduced)
   }

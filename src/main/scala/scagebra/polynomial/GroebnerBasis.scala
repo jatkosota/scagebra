@@ -1,15 +1,15 @@
 package scagebra
 package polynomial
 
-import Variables.Implicits._
 import Monomial.Implicits._
+import Term.Implicits._
 import Polynomial.Implicits._
 import Groebner._
 
 case class GroebnerBasis[T](bases: Set[Polynomial[T]])(implicit ord: Ordering[T]) {
 
   def minimal: GroebnerBasis[T] = {
-    val lt1 = bases.map { p => p * Monomial(p.LC.reciprocal)(ord) }
+    val lt1 = bases.map { p => p * Term(p.LC.reciprocal)(ord) }
 
     def eliminate(gs: List[Polynomial[T]], ms: Set[Polynomial[T]]): Set[Polynomial[T]] =
       gs match {

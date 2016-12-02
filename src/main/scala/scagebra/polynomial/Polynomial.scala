@@ -3,9 +3,9 @@ package polynomial
 
 import scala.collection.immutable.TreeMap
 import Rational.Implicits._
-import Monomial.Implicits._
+import Term.Implicits._
 
-case class Polynomial[T](monomials: TreeMap[Variables[T], Rational])(implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]) {
+case class Polynomial[T](monomials: TreeMap[Monomial[T], Rational])(implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]) {
 
   def reduce: Polynomial[T] =
     Polynomial(monomials.filter { case (vs, r) => r != 0 })
@@ -13,13 +13,13 @@ case class Polynomial[T](monomials: TreeMap[Variables[T], Rational])(implicit or
   // TODO canEqual
 
   override def toString =
-    monomials.toList.map(Monomial(_)).mkString(" + ")
+    monomials.toList.map(Term(_)).mkString(" + ")
 
   override def equals(other: Any): Boolean = other match {
     case that: Polynomial[T] =>
       Polynomial.PolynomialIsNumeric(ord, ordVar).compare(this, that) == 0
     case that: Int =>
-      (this.reduce.monomials.size == 1 && Monomial(this.reduce.monomials.head) == that) ||
+      (this.reduce.monomials.size == 1 && Term(this.reduce.monomials.head) == that) ||
         (this.reduce.monomials.isEmpty && that == 0)
     case _ => false // TODO Int, Long, BigInt, Double, Float
   }
@@ -27,7 +27,7 @@ case class Polynomial[T](monomials: TreeMap[Variables[T], Rational])(implicit or
 
 object Polynomial {
 
-  implicit def MonomialToPolynomial[T](monomial: Monomial[T])(implicit ord: Ordering[T]): Polynomial[T] =
+  implicit def TermToPolynomial[T](monomial: Term[T])(implicit ord: Ordering[T]): Polynomial[T] =
     Polynomial(monomial)
 
   trait ExtraImplicits {
@@ -37,7 +37,7 @@ object Polynomial {
 
   object Implicits extends ExtraImplicits
 
-  implicit def PolynomialIsNumeric[T](implicit ord: Ordering[T], ordVar: Ordering[Variables[T]]): Numeric[Polynomial[T]] =
+  implicit def PolynomialIsNumeric[T](implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]): Numeric[Polynomial[T]] =
     new Numeric[Polynomial[T]] {
 
       private def plusMinus(x: Polynomial[T], y: Polynomial[T])(f: (Rational, Rational) => Rational): Polynomial[T] =
@@ -67,11 +67,11 @@ object Polynomial {
         val ms = for {
           xm <- x.monomials.iterator
           ym <- y.monomials.iterator
-          m1 = Monomial(xm)
-          m2 = Monomial(ym)
+          m1 = Term(xm)
+          m2 = Term(ym)
           m = m1 * m2
         } yield m.variables -> m.coefficient
-        ms.foldLeft(Polynomial[T]())((p, m)=> p + Polynomial(Monomial(m)))
+        ms.foldLeft(Polynomial[T]())((p, m)=> p + Polynomial(Term(m)))
       }
 
       def toInt(x: Polynomial[T]): Int =
@@ -95,14 +95,14 @@ object Polynomial {
         else throw new IllegalStateException(s"$x cannot convert to Double.")
 
       def fromInt(x: Int): Polynomial[T] =
-        Polynomial(Monomial(x, Variables.empty[T]))
+        Polynomial(Term(x, Monomial.empty[T]))
 
       def compare(x: Polynomial[T], y: Polynomial[T]) = {
         val xrm = x.reduce.monomials
         val yrm = y.reduce.monomials
         (xrm zip yrm).dropWhile(t => t._1 == t._2).headOption match {
           case Some((xm, ym)) =>
-            Monomial.MonomialIsFractional(ord, ordVar).compare(Monomial(xm), Monomial(ym))
+            Term.TermIsFractional(ord, ordVar).compare(Term(xm), Term(ym))
           case None =>
             if(xrm.size < yrm.size) -1
             else if(xrm.size > yrm.size) 1
@@ -111,7 +111,7 @@ object Polynomial {
       }
     }
 
-  def apply[T](monomials: Monomial[T]*)(implicit ord: Ordering[T]): Polynomial[T] =
+  def apply[T](monomials: Term[T]*)(implicit ord: Ordering[T]): Polynomial[T] =
     Polynomial(TreeMap(monomials.map(m => m.variables -> m.coefficient): _*))
 
   def empty[T](implicit ord: Ordering[T]): Polynomial[T] =

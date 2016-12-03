@@ -13,7 +13,10 @@ case class Polynomial[T](monomials: TreeMap[Monomial[T], Rational])(implicit ord
   // TODO canEqual
 
   override def toString =
-    monomials.toList.map(Term(_)).mkString(" + ")
+    if(monomials.isEmpty)
+      "0"
+    else 
+      monomials.toList.map(Term(_)).mkString(" + ")
 
   override def equals(other: Any): Boolean = other match {
     case that: Polynomial[T] =>

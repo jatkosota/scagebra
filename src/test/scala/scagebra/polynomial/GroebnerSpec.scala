@@ -172,20 +172,20 @@ class GroebnerSpec extends FunSuite {
 
     assert(groebner(Set(
       p(m(1, v(x ^ 1)), m(1, v(y ^ 1))),
-      p(m(1, v(x ^ 2)), Monomial[String](-1)),
+      p(m(1, v(x ^ 2)), Term[String](-1)),
       p(m(1, v(y ^ 2)), m(-2, v(x ^ 1)))
     ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
-      == GroebnerBasis(Set(p(Monomial[String](1))))
+      == GroebnerBasis(Set(p(Term[String](1))))
     )
 
     assert(groebner(Set(
       p(m(1, v(x ^ 1)), m(1, v(y ^ 1))),
-      p(m(1, v(x ^ 2)), Monomial[String](-1)),
+      p(m(1, v(x ^ 2)), Term[String](-1)),
       p(m(1, v(y ^ 2)), m(-2, v(x ^ 1)))
     ))(implicitly[scala.math.Ordering[String]], Buchberger).reduced
       == groebner(Set(
         p(m(1, v(x ^ 1)), m(1, v(y ^ 1))),
-        p(m(1, v(x ^ 2)), Monomial[String](-1)),
+        p(m(1, v(x ^ 2)), Term[String](-1)),
         p(m(1, v(y ^ 2)), m(-2, v(x ^ 1)))
       ))(implicitly[scala.math.Ordering[String]], Syzygy).reduced
     )

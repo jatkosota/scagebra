@@ -101,4 +101,16 @@ object Rational {
     def toLong(x: Rational): Long =
       (x.numer / x.denom).toLong
   }
+
+  def pow(x: Rational, e: Int): Rational = {
+    import Implicits._
+    @scala.annotation.tailrec
+    def loop(x: Rational, e: Int, acc: Rational = 1): Rational =
+      if(e <= 0)
+        acc
+      else
+        loop(x, e - 1, x * acc)
+
+    loop(x, e)
+  }
 }

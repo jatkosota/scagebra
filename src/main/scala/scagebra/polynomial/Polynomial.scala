@@ -7,8 +7,62 @@ import Term.Implicits._
 
 case class Polynomial[T](monomials: TreeMap[Monomial[T], Rational])(implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]) {
 
-  def reduce: Polynomial[T] =
+  lazy val reduce: Polynomial[T] =
     Polynomial(monomials.filter { case (vs, r) => r != 0 })
+
+  /** Substitutes the rational value for the variable.
+    * This method return Rational. If there is any variables cannot be substituted by the Map which given by a argument, throws exception which is NoSuchElementException.
+    * Note: for all variables should be substituted.
+    */
+  def substituteAll(sub: Map[T, Rational]): Rational =
+    monomials.map {
+      case (monomial, coefficient) =>
+        coefficient * (monomial.map {
+          case (variable, e) =>
+            Rational.pow(sub(variable), e)
+        }).foldLeft(Rational(1))(_ * _)
+    }.sum
+
+  /** Substitutes the rational value for the variable.
+    * This method return Polynomial.
+    */
+  def substitute(sub: Map[T, Rational]): Polynomial[T] =
+    monomials.toSeq.map {
+      case (monomial, coefficient) =>
+        val (rsR, monsL) = monomial.map {
+          case (variable, e) =>
+            sub.get(variable) match {
+              case Some(v) =>
+                Right(Rational.pow(sub(variable), e))
+              case None =>
+                Left((variable, e))
+            }
+        }.partition(_.isRight)
+        val rs = rsR.collect { case Right(v) => v }
+        val mons = monsL.collect { case Left(v) => v }
+        Polynomial(
+          Term(coefficient * rs.foldLeft(Rational(1))(_ * _),
+            TreeMap(mons.toSeq: _*))(ord, ordVar)
+        )
+    }.sum
+
+  /** Return this polynomial is const or not. */
+  lazy val isConst: Boolean =
+    reduce.monomials.isEmpty ||
+      (reduce.monomials.size == 1 && reduce.monomials.head._1.isEmpty)
+
+  /** Convert to Rational. 
+    * If this polynomial is const, returns rational wrapped Option.
+    * If not returns None.
+    */
+  def toRational: Option[Rational] =
+    if(isConst)
+      if(reduce.monomials.isEmpty)
+        Some(Rational(0))
+      else
+        reduce.monomials.headOption.map(_._2)
+    else
+      None
 
   // TODO canEqual
 

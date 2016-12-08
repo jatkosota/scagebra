@@ -132,22 +132,26 @@ object Polynomial {
       }
 
       def toInt(x: Polynomial[T]): Int =
-        if(x.monomials.forall(_._1.isEmpty))
+        if(x.monomials.isEmpty) 0
+        else if(x.monomials.forall(_._1.isEmpty))
           x.monomials.head._2.toInt
         else throw new IllegalStateException(s"$x cannot convert to Int.")
 
       def toLong(x: Polynomial[T]): Long =
-        if(x.monomials.forall(_._1.isEmpty))
+        if(x.monomials.isEmpty) 0
+        else if(x.monomials.forall(_._1.isEmpty))
           x.monomials.head._2.toLong
         else throw new IllegalStateException(s"$x cannot convert to Long.")
         
       def toFloat(x: Polynomial[T]): Float =
-        if(x.monomials.forall(_._1.isEmpty))
+        if(x.monomials.isEmpty) 0
+        else if(x.monomials.forall(_._1.isEmpty))
           x.monomials.head._2.toFloat
         else throw new IllegalStateException(s"$x cannot convert to Float.")
 
       def toDouble(x: Polynomial[T]): Double =
-        if(x.monomials.forall(_._1.isEmpty))
+        if(x.monomials.isEmpty) 0
+        else if(x.monomials.forall(_._1.isEmpty))
           x.monomials.head._2.toDouble
         else throw new IllegalStateException(s"$x cannot convert to Double.")
 

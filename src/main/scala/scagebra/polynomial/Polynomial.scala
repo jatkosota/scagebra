@@ -7,7 +7,7 @@ import Term.Implicits._
 
 case class Polynomial[T](monomials: TreeMap[Monomial[T], Rational])(implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]) {
 
-  def reduce: Polynomial[T] =
+  lazy val reduce: Polynomial[T] =
     Polynomial(monomials.filter { case (vs, r) => r != 0 })
 
   /** Substitutes the rational value for the variable.

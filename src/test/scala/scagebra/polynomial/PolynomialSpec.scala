@@ -13,6 +13,12 @@ class PolynomialSpec extends FunSuite {
   val y = "y"
   val z = "z"
 
+  test("Polynomial has substitution") {
+    // TODO
+  }
+
+  // Numeric
+
   test("Polynomial has tree arithmetic operations") {
     // x + 2x == 3x
     assert(

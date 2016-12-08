@@ -14,6 +14,10 @@ class RationalSpec extends FunSuite {
     assert(Rational(2, -4).reduce == Rational(-1, 2))
   }
 
+  test("Rational can calculate pow") {
+    // TODO
+  }
+
   // Fractional
 
   test("Rational has reciprocal") {

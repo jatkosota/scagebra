@@ -16,7 +16,7 @@ case class GroebnerBasis[T](bases: Set[Polynomial[T]])(implicit ord: Ordering[T]
         case Nil => ms
         case hd::tl =>
           if(ms(hd)) {
-            val canElim = ms.filter(g => (g.LT/hd.LT).variables.forall(_._2 >= 0))
+            val canElim = ms.filter(g => (g.LT/hd.LT).monomial.forall(_._2 >= 0))
             eliminate(tl, (ms &~ canElim) + hd)
           } else eliminate(tl, ms)
       }

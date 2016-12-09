@@ -7,7 +7,7 @@ import Polynomial.Implicits._
 
 object Groebner {
 
-  implicit class GroebnerPolynomial[T](self: Polynomial[T])(implicit ord: Ordering[T], ordVar: Ordering[Monomial[T]]) {
+  implicit class GroebnerPolynomial[T](self: Polynomial[T])(implicit ord: Ordering[T], ordMon: Ordering[Monomial[T]]) {
 
     def div(fs: List[Polynomial[T]]): List[Polynomial[T]] = divMod(fs)._1
 
@@ -38,7 +38,7 @@ object Groebner {
           case (Nil, Nil) => (nas.reverse, p, false)
           case ((fh::ft), (ah::at)) =>
             val div = p.LT / fh.LT
-            if(div.variables.forall(_._2 >= 0)) {
+            if(div.monomial.forall(_._2 >= 0)) {
               val ai = ah + div
               // Fixme want to write like p - div * fh
               val np = p - Polynomial(div) * fh
@@ -53,13 +53,13 @@ object Groebner {
     /** leading coefficient */
     def LC: Rational = LT.coefficient
     /** leading monomial */
-    def LM: Monomial[T] = LT.variables
+    def LM: Monomial[T] = LT.monomial
     /** leading term */
     def LT: Term[T] =
-      if(self.monomials.isEmpty)
+      if(self.terms.isEmpty)
         Term(0)
     else
-      Term(self.monomials.max)
+      Term(self.terms.max)
 
     def multideg: Monomial[T] = LM
   }
@@ -93,7 +93,7 @@ object Groebner {
 
   /** @see [[scagebra.polynomial.Groebner#LCM]] */
   def γ[T](f: Polynomial[T], g: Polynomial[T])(implicit ord: Ordering[T]): Monomial[T] =
-    LCM(f, g).variables
+    LCM(f, g).monomial
 
   implicit def Syzygy[T](gs: Set[Polynomial[T]])(implicit ord: Ordering[T]): GroebnerBasis[T] = {
     val B = for {
@@ -111,7 +111,7 @@ object Groebner {
         val (i, j) = ij
         k != i && k != j &&
           !B(pair(i, k)) && !B(pair(j, k)) &&
-            (LCM(G(i), G(j)) / G(k).LT).variables.forall(_._2 >= 0)
+            (LCM(G(i), G(j)) / G(k).LT).monomial.forall(_._2 >= 0)
       }
 
     def iteration(B: Set[(Int, Int)], G: List[Polynomial[T]], t: Int): List[Polynomial[T]] =

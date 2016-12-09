@@ -45,12 +45,12 @@ package object polynomial {
       TreeMap.empty
   }
 
-  def v[T](args: (T, Int)*)(implicit ord: Ordering[T]): Monomial[T] = {
+  def m[T](args: (T, Int)*)(implicit ord: Ordering[T]): Monomial[T] = {
     require(args.forall(_._2 >= 0))
     TreeMap(args.filter(_._2 != 0): _*)
   }
 
-  def m[T](coef: Rational, vars: Monomial[T])(implicit ord: Ordering[T]): Term[T] =
+  def t[T](coef: Rational, vars: Monomial[T])(implicit ord: Ordering[T]): Term[T] =
     Term(coef, vars)
 
   def p[T](args: Term[T]*)(implicit ord: Ordering[T]): Polynomial[T] =

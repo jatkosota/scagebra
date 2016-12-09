@@ -15,49 +15,49 @@ class TermSpec extends FunSuite {
   val z = "z"
 
   test("Term has four arithmetic oparations") {
-    assert(m(1, v(x ^ 1)) + m(2, v(x ^ 1)) == m(3, v(x ^ 1)))
-    assert(m(1, v(x ^ 1)) + m(2, v(x ^ 2)) == m(1, v(x ^ 1)))
-    assert(m(2, v(x ^ 2)) + m(1, v(x ^ 1)) == m(2, v(x ^ 2)))
-    assert(m(0, v(x ^ 2)) == 0)
-    assert(m(0, v(x ^ 2)) == 0.0)
+    assert(t(1, m(x ^ 1)) + t(2, m(x ^ 1)) == t(3, m(x ^ 1)))
+    assert(t(1, m(x ^ 1)) + t(2, m(x ^ 2)) == t(1, m(x ^ 1)))
+    assert(t(2, m(x ^ 2)) + t(1, m(x ^ 1)) == t(2, m(x ^ 2)))
+    assert(t(0, m(x ^ 2)) == 0)
+    assert(t(0, m(x ^ 2)) == 0.0)
 
-    assert(m(1, v(x ^ 1)) - m(2, v(x ^ 1)) == m(-1, v(x ^ 1)))
-    assert(m(1, v(x ^ 1)) - m(2, v(x ^ 2)) == m(1, v(x ^ 1)))
-    assert(m(2, v(x ^ 2)) - m(1, v(x ^ 1)) == m(2, v(x ^ 2)))
-    assert(m(2, v(x ^ 2)) - m(2, v(x ^ 2)) == m(0, v[String]()))
+    assert(t(1, m(x ^ 1)) - t(2, m(x ^ 1)) == t(-1, m(x ^ 1)))
+    assert(t(1, m(x ^ 1)) - t(2, m(x ^ 2)) == t(1, m(x ^ 1)))
+    assert(t(2, m(x ^ 2)) - t(1, m(x ^ 1)) == t(2, m(x ^ 2)))
+    assert(t(2, m(x ^ 2)) - t(2, m(x ^ 2)) == t(0, m[String]()))
     
-    assert(m(2, v(x ^ 2)) * m(1, v(x ^ 1)) == m(2, v(x ^ 3)))
-    assert(m(2, v(x ^ 2)) * m(2, v(x ^ 1)) == m(4, v(x ^ 3)))
-    assert(m(1, v(x ^ 1, y ^ 2)) * m(3, v(z ^ 3)) == m(3, v(x ^ 1, y ^ 2, z ^ 3)))
-    assert(m(1, v(x ^ 1, y ^ 2)) * m(3, v(x ^ 2, z ^ 3)) == m(3, v(x ^ 3, y ^ 2, z ^ 3)))
-    assert(m(2, v(x ^ 2)) * m(0, v(x ^ 1)) == m(0, v[String]()))
+    assert(t(2, m(x ^ 2)) * t(1, m(x ^ 1)) == t(2, m(x ^ 3)))
+    assert(t(2, m(x ^ 2)) * t(2, m(x ^ 1)) == t(4, m(x ^ 3)))
+    assert(t(1, m(x ^ 1, y ^ 2)) * t(3, m(z ^ 3)) == t(3, m(x ^ 1, y ^ 2, z ^ 3)))
+    assert(t(1, m(x ^ 1, y ^ 2)) * t(3, m(x ^ 2, z ^ 3)) == t(3, m(x ^ 3, y ^ 2, z ^ 3)))
+    assert(t(2, m(x ^ 2)) * t(0, m(x ^ 1)) == t(0, m[String]()))
 
-    assert(m(2, v(x ^ 2)) / m(1, v(x ^ 1)) == m(2, v(x ^ 1)))
-    assert(m(2, v(x ^ 2)) / m(2, v(x ^ 1)) == m(1, v(x ^ 1)))
-    assert(m(1, v(x ^ 1, y ^ 2)) / m(3, v(y ^ 2)) == m(Rational(1, 3), v(x ^ 1)))
-    assert(m(1, v(x ^ 3, y ^ 2, z ^ 4)) / m(3, v(x ^ 2, z ^ 3)) == m(Rational(1, 3), v(x ^ 1, y ^ 2, z ^ 1)))
-    assert(m(2, v(x ^ 2)) / m(1, v(x ^ 2)) == m(2, v[String]()))
+    assert(t(2, m(x ^ 2)) / t(1, m(x ^ 1)) == t(2, m(x ^ 1)))
+    assert(t(2, m(x ^ 2)) / t(2, m(x ^ 1)) == t(1, m(x ^ 1)))
+    assert(t(1, m(x ^ 1, y ^ 2)) / t(3, m(y ^ 2)) == t(Rational(1, 3), m(x ^ 1)))
+    assert(t(1, m(x ^ 3, y ^ 2, z ^ 4)) / t(3, m(x ^ 2, z ^ 3)) == t(Rational(1, 3), m(x ^ 1, y ^ 2, z ^ 1)))
+    assert(t(2, m(x ^ 2)) / t(1, m(x ^ 2)) == t(2, m[String]()))
   }
 
   test("Term can reduce") {
-    assert(m(2, v(x ^ 1, y ^ 0)).reduce == m(2, v(x ^ 1)))
-    assert(m(0, v(x ^ 1, y ^ 2, z ^ 0)).reduce == Term[String](0))
-    assert(m(2, v(x ^ 0, y ^ 0)).reduce == Term[String](2))
+    assert(t(2, m(x ^ 1, y ^ 0)).reduce == t(2, m(x ^ 1)))
+    assert(t(0, m(x ^ 1, y ^ 2, z ^ 0)).reduce == Term[String](0))
+    assert(t(2, m(x ^ 0, y ^ 0)).reduce == Term[String](2))
   }
 
   test("Term has relational operators") {
-    assert(m(1, v(x ^ 1)) < m(1, v(x ^ 2)))
-    assert(m(1, v(x ^ 1, y ^ 1)) < m(1, v(x ^ 2)))
-    assert(m(1, v(x ^ 1)) < m(1, v(x ^ 1, y ^ 1)))
-    assert(m(1, v(x ^ 1)) < m(2, v(x ^ 1, y ^ 1)))
-    assert(m(1, v(x ^ 1)) < m(2, v(x ^ 1)))
+    assert(t(1, m(x ^ 1)) < t(1, m(x ^ 2)))
+    assert(t(1, m(x ^ 1, y ^ 1)) < t(1, m(x ^ 2)))
+    assert(t(1, m(x ^ 1)) < t(1, m(x ^ 1, y ^ 1)))
+    assert(t(1, m(x ^ 1)) < t(2, m(x ^ 1, y ^ 1)))
+    assert(t(1, m(x ^ 1)) < t(2, m(x ^ 1)))
 
-    assert(m(1, v(x ^ 1, y ^ 1)) > m(1, v(x ^ 1)))
-    assert(m(1, v(x ^ 2, y ^ 1)) > m(1, v(x ^ 1)))
-    assert(m(1, v(x ^ 1, y ^ 1)) > m(1, v(x ^ 1, z ^ 1)))
+    assert(t(1, m(x ^ 1, y ^ 1)) > t(1, m(x ^ 1)))
+    assert(t(1, m(x ^ 2, y ^ 1)) > t(1, m(x ^ 1)))
+    assert(t(1, m(x ^ 1, y ^ 1)) > t(1, m(x ^ 1, z ^ 1)))
 
-    assert(m(1, v(x ^ 1, y ^ 0)) == m(1, v(x ^ 1)))
-    assert(m(1, v(x ^ 0, y ^ 0)) == m(1, v(z ^ 0)))
+    assert(t(1, m(x ^ 1, y ^ 0)) == t(1, m(x ^ 1)))
+    assert(t(1, m(x ^ 0, y ^ 0)) == t(1, m(z ^ 0)))
   }
 
   // TODO add test for compare

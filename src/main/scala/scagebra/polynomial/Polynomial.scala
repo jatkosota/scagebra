@@ -46,6 +46,23 @@ case class Polynomial[T](terms: TreeMap[Monomial[T], Rational])(implicit ord: Or
         )
     }.sum
 
+  def pow(e: Int): Polynomial[T] = {
+    import Polynomial.Implicits._
+
+    @scala.annotation.tailrec
+    def loop(e: Int, acc: Polynomial[T]): Polynomial[T] =
+      if(e <= 1)
+        acc
+      else {
+        val ps = for {
+          term <- acc.terms
+          source = Polynomial(TreeMap(term))
+        } yield source * this
+        loop(e - 1, ps.sum)
+      }
+    loop(e, this)
+  }
+
   /** Return this polynomial is const or not. */
   lazy val isConst: Boolean =
     reduce.terms.isEmpty ||

@@ -38,5 +38,8 @@ case class GroebnerBasis[T](bases: Set[Polynomial[T]])(implicit ord: Ordering[T]
 
     GroebnerBasis(reduce(mini.bases.toList, mini.bases))
   }
+
+  def ++(that: GroebnerBasis[T]): GroebnerBasis[T] =
+    groebner(this.reduced.bases ++ that.reduced.bases).reduced
 }
 
